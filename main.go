@@ -17,8 +17,8 @@ const dateTimeScondLen = len("yyyy-mm-ddTHH:MM:SS")
 var digTbl = buildDigitTable()
 
 func main() {
-	tz := flag.String("tz", "Z", "UTF timezone string to search")
-	onlyFirst := flag.Bool("only-first", false, "convert only the first datetime in each line")
+	tz := flag.String("tz", "Z", `UTF timezone string to search ("Z" or "+00:00")`)
+	all := flag.Bool("all", false, "convert all datetimes in each line if set, only the first datetime in each line if unset")
 	showVersion := flag.Bool("version", false, "show version and exit")
 	flag.Parse()
 
@@ -33,7 +33,7 @@ func main() {
 	default:
 		log.Fatal(`Flag -tz must be one of "Z" or "+00:00"`)
 	}
-	if err := run([]byte(*tz), *onlyFirst); err != nil {
+	if err := run([]byte(*tz), *all); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -58,9 +58,9 @@ const layout3 = "2006-01-02T15:04:05.999Z07:00"
 const layout6 = "2006-01-02T15:04:05.999999Z07:00"
 const layout9 = "2006-01-02T15:04:05.999999999Z07:00"
 
-func run(tz []byte, onlyFirst bool) error {
+func run(tz []byte, all bool) error {
 	bw := bufio.NewWriter(os.Stdout)
-	if err := convertDatetime(os.Stdin, bw, tz, onlyFirst,
+	if err := convertDatetime(os.Stdin, bw, tz, all,
 		time.Now().Location()); err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func run(tz []byte, onlyFirst bool) error {
 	return nil
 }
 
-func convertDatetime(r io.Reader, w io.Writer, tz []byte, onlyFirst bool,
+func convertDatetime(r io.Reader, w io.Writer, tz []byte, all bool,
 	local *time.Location) error {
 	br := bufio.NewReader(r)
 	var output []byte
@@ -109,7 +109,7 @@ func convertDatetime(r io.Reader, w io.Writer, tz []byte, onlyFirst bool,
 			}
 			output = t.In(local).AppendFormat(output, layout)
 			input = input[end:]
-			if onlyFirst {
+			if !all {
 				output = append(output, input...)
 				if _, err := w.Write(output); err != nil {
 					return err

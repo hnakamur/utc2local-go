@@ -27,37 +27,42 @@ func BenchmarkConvertDatetime(b *testing.B) {
 
 func TestConvertDatetime(t *testing.T) {
 	testCases := []struct {
-		input     string
-		tz        string
-		onlyFirst bool
-		want      string
+		input string
+		tz    string
+		all   bool
+		want  string
 	}{
 		{
 			input: "time:2024-05-22T12:34:56.123Z\turi:/",
-			tz:    "Z", onlyFirst: true,
-			want: "time:2024-05-22T21:34:56.123+09:00\turi:/",
+			tz:    "Z",
+			all:   false,
+			want:  "time:2024-05-22T21:34:56.123+09:00\turi:/",
 		},
 		{
 			input: "time:2024-05-22T12:34:56.123Z\turi:/\n" +
 				"time:2024-05-22T23:34:56.123Z\turi:/",
-			tz: "Z", onlyFirst: true,
+			tz:  "Z",
+			all: false,
 			want: "time:2024-05-22T21:34:56.123+09:00\turi:/\n" +
 				"time:2024-05-23T08:34:56.123+09:00\turi:/",
 		},
 		{
 			input: "time:2024-05-22T12:34:56.123Z\turi:/\ttime2:2024-05-22T23:34:56Z",
-			tz:    "Z", onlyFirst: false,
-			want: "time:2024-05-22T21:34:56.123+09:00\turi:/\ttime2:2024-05-23T08:34:56+09:00",
+			tz:    "Z",
+			all:   true,
+			want:  "time:2024-05-22T21:34:56.123+09:00\turi:/\ttime2:2024-05-23T08:34:56+09:00",
 		},
 		{
 			input: "time:2024-05-22T12:34:56.123Z\turi:/Z\ttime2:2024-05-22T23:34:56Z",
-			tz:    "Z", onlyFirst: false,
-			want: "time:2024-05-22T21:34:56.123+09:00\turi:/Z\ttime2:2024-05-23T08:34:56+09:00",
+			tz:    "Z",
+			all:   true,
+			want:  "time:2024-05-22T21:34:56.123+09:00\turi:/Z\ttime2:2024-05-23T08:34:56+09:00",
 		},
 		{
 			input: "time:2024-05-22T12:34:56.123Z\turi:/\ttime2:2024-05-22T23:34:56.123Z\n" +
 				"time:2024-05-22T12:34:57.123456Z\turi:/\ttime2:2024-05-22T23:34:57.123456789Z\n",
-			tz: "Z", onlyFirst: false,
+			tz:  "Z",
+			all: true,
 			want: "time:2024-05-22T21:34:56.123+09:00\turi:/\ttime2:2024-05-23T08:34:56.123+09:00\n" +
 				"time:2024-05-22T21:34:57.123456+09:00\turi:/\ttime2:2024-05-23T08:34:57.123456789+09:00\n",
 		},
@@ -69,13 +74,13 @@ func TestConvertDatetime(t *testing.T) {
 	for _, tc := range testCases {
 		var b strings.Builder
 		r := strings.NewReader(tc.input)
-		if err := convertDatetime(r, &b, []byte(tc.tz), tc.onlyFirst, local); err != nil {
+		if err := convertDatetime(r, &b, []byte(tc.tz), tc.all, local); err != nil {
 			t.Fatal(err)
 		}
 		got := b.String()
 		if got != tc.want {
 			t.Errorf("result mismatch,\n got=%q,\nwant=%q,\ninput=%q, tz=%s, onlyFirst=%v",
-				got, tc.want, tc.input, tc.tz, tc.onlyFirst)
+				got, tc.want, tc.input, tc.tz, tc.all)
 		}
 	}
 }

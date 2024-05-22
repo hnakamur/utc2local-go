@@ -12,10 +12,10 @@ Usage:
 ```
 $ ./utc2local -h
 Usage of ./utc2local:
-  -only-first
-        convert only the first datetime in each line
+  -all
+        convert all datetimes in each line if set, only the first datetime in each line if unset
   -tz string
-        UTF timezone string to search (default "Z")
+        UTF timezone string to search ("Z" or "+00:00") (default "Z")
   -version
         show version and exit
 ```
