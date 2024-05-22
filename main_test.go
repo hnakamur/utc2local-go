@@ -50,6 +50,11 @@ func TestConvertDatetime(t *testing.T) {
 			want: "time:2024-05-22T21:34:56.123+09:00\turi:/\ttime2:2024-05-23T08:34:56+09:00",
 		},
 		{
+			input: "time:2024-05-22T12:34:56.123Z\turi:/Z\ttime2:2024-05-22T23:34:56Z",
+			tz:    "Z", onlyFirst: false,
+			want: "time:2024-05-22T21:34:56.123+09:00\turi:/Z\ttime2:2024-05-23T08:34:56+09:00",
+		},
+		{
 			input: "time:2024-05-22T12:34:56.123Z\turi:/\ttime2:2024-05-22T23:34:56.123Z\n" +
 				"time:2024-05-22T12:34:57.123456Z\turi:/\ttime2:2024-05-22T23:34:57.123456789Z\n",
 			tz: "Z", onlyFirst: false,
@@ -86,6 +91,26 @@ func TestFindUTCDatetime(t *testing.T) {
 		{
 			input: "time:2024-05-22T12:34:56.123Z\turi:/", tz: "Z",
 			wantStart: len("time:"), wantEnd: len("time:2024-05-22T12:34:56.123Z"),
+			wantSubSecondDigitLen: 3,
+		},
+		{
+			input: "uri:/Z\ttime:2024-05-22T12:34:56.123Z", tz: "Z",
+			wantStart: len("uri:/Z\ttime:"), wantEnd: len("uri:/Z\ttime:2024-05-22T12:34:56.123Z"),
+			wantSubSecondDigitLen: 3,
+		},
+		{
+			input: "uri:/2024-05-22T12:34:56.12bZ\ttime:2024-05-22T12:34:56.123Z", tz: "Z",
+			wantStart: len("uri:/2024-05-22T12:34:56.12bZ\ttime:"), wantEnd: len("uri:/2024-05-22T12:34:56.12bZ\ttime:2024-05-22T12:34:56.123Z"),
+			wantSubSecondDigitLen: 3,
+		},
+		{
+			input: "uri:/+00:00\ttime:2024-05-22T12:34:56.123+00:00", tz: "+00:00",
+			wantStart: len("uri:/+00:00\ttime:"), wantEnd: len("uri:/+00:00\ttime:2024-05-22T12:34:56.123+00:00"),
+			wantSubSecondDigitLen: 3,
+		},
+		{
+			input: "uri:/2024-05-22T12:34:56.12b+00:00\ttime:2024-05-22T12:34:56.123+00:00", tz: "+00:00",
+			wantStart: len("uri:/2024-05-22T12:34:56.12b+00:00\ttime:"), wantEnd: len("uri:/2024-05-22T12:34:56.12b+00:00\ttime:2024-05-22T12:34:56.123+00:00"),
 			wantSubSecondDigitLen: 3,
 		},
 	}

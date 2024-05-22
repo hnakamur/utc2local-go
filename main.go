@@ -128,10 +128,24 @@ func convertDatetime(r io.Reader, w io.Writer, tz []byte, onlyFirst bool,
 func findUTCDatetime(p, tz []byte) (start, end, subSecondDigitLen int) {
 	// search yyyy-mm-ddTHH:MM:SS{subsecond}?{tz}
 	// subsecond = (empty) | .SSS | .SSSSSS | .SSSSSSSSS
-	tzPos := bytes.Index(p, tz)
-	if tzPos == -1 {
-		return -1, -1, 0
+	pos := 0
+	for {
+		tzPos := bytes.Index(p, tz)
+		if tzPos == -1 {
+			return -1, -1, 0
+		}
+
+		start, end, subSecondDigitLen = detectUTCDatetimeRange(p, tz, tzPos)
+		if start != -1 {
+			return start + pos, end + pos, subSecondDigitLen
+		}
+
+		pos += tzPos + len(tz)
+		p = p[tzPos+len(tz):]
 	}
+}
+
+func detectUTCDatetimeRange(p, tz []byte, tzPos int) (start, end, subSecondDigitLen int) {
 	end = tzPos + len(tz)
 	dotPos := bytes.LastIndexByte(p[:tzPos], '.')
 	if dotPos == -1 {
