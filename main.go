@@ -76,13 +76,11 @@ func convertDatetime(r io.Reader, w io.Writer, tz []byte, onlyFirst bool,
 	var output []byte
 	for {
 		input, err := br.ReadBytes('\n')
-		// log.Printf("after ReadBytes, input=%q, err=%v", input, err)
 		if err != nil && err != io.EOF {
 			return err
 		}
 		for {
 			start, end, subSecondDigitLen := findUTCDatetime(input, tz)
-			// log.Printf("after findUTCDatetime, start=%d, end=%d, subSecondDigitLen=%d", start, end, subSecondDigitLen)
 			if start == -1 {
 				output = append(output, input...)
 				if _, err := w.Write(output); err != nil {
@@ -106,11 +104,9 @@ func convertDatetime(r io.Reader, w io.Writer, tz []byte, onlyFirst bool,
 				layout = layout9
 			}
 			t, err := time.Parse(layout, string(input[start:end]))
-			// log.Printf("after time.Parse, t=%v, err=%v", t, err)
 			if err != nil {
 				return err
 			}
-			// log.Printf("t.In(local)=%v", t.In(local))
 			output = t.In(local).AppendFormat(output, layout)
 			input = input[end:]
 			if onlyFirst {
@@ -133,27 +129,22 @@ func findUTCDatetime(p, tz []byte) (start, end, subSecondDigitLen int) {
 	// search yyyy-mm-ddTHH:MM:SS{subsecond}?{tz}
 	// subsecond = (empty) | .SSS | .SSSSSS | .SSSSSSSSS
 	tzPos := bytes.Index(p, tz)
-	// log.Printf("after bytes.Index, tzPos=%d", tzPos)
 	if tzPos == -1 {
 		return -1, -1, 0
 	}
 	end = tzPos + len(tz)
 	dotPos := bytes.LastIndexByte(p[:tzPos], '.')
-	// log.Printf("dotPos=%d", dotPos)
 	if dotPos == -1 {
 		start = tzPos - dateTimeScondLen
-		// log.Printf("start#1=%d", start)
 		if start < 0 {
 			return -1, -1, 0
 		}
 	} else {
 		start = dotPos - dateTimeScondLen
-		// log.Printf("start#2=%d", start)
 		if start < 0 {
 			return -1, -1, 0
 		}
 		subSecondDigitLen = tzPos - (dotPos + len("."))
-		// log.Printf("subSecondDigitLen=%d, subsecond=%s", subSecondDigitLen, string(p[dotPos+1:tzPos]))
 		switch subSecondDigitLen {
 		case 3:
 			if !(digTbl[p[dotPos+1]] && digTbl[p[dotPos+2]] && digTbl[p[dotPos+3]]) {
@@ -174,16 +165,6 @@ func findUTCDatetime(p, tz []byte) (start, end, subSecondDigitLen int) {
 			return -1, -1, 0
 		}
 	}
-
-	// log.Printf("datetimePart=%s", string(p[start:end]))
-	// log.Printf("0:%v, 1:%v, 2:%v, 3:%v,\n4:%v, 5:%v, 6:%v,\n7:%v, 8:%v, 9:%v,\n10:%v, 11:%v, 12:%v,\n13:%v, 14:%v, 15:%v,\n16:%v, 17:%v, 18:%v,",
-	// 	digTbl[p[start]], digTbl[p[start+1]], digTbl[p[start+2]], digTbl[p[start+3]],
-	// 	p[start+4] == '-', digTbl[p[start+5]], digTbl[p[start+6]],
-	// 	p[start+7] == '-', digTbl[p[start+8]], digTbl[p[start+9]],
-	// 	p[start+10] == 'T', digTbl[p[start+11]], digTbl[p[start+12]],
-	// 	p[start+13] == ':', digTbl[p[start+14]], digTbl[p[start+15]],
-	// 	p[start+16] == ':', digTbl[p[start+17]], digTbl[p[start+18]],
-	// )
 
 	// Validate yyyy-mm-ddTHH:MM:SS part.
 	if !(digTbl[p[start]] && digTbl[p[start+1]] && digTbl[p[start+2]] && digTbl[p[start+3]] &&
