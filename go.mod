@@ -1,3 +1,3 @@
-module github.com/hnakamur/utc2local
+module github.com/hnakamur/utc2local-go
 
-go 1.22.2
+go 1.22.3
