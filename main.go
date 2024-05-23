@@ -54,9 +54,9 @@ func buildDigitTable() (tbl [256]bool) {
 }
 
 const layout0 = "2006-01-02T15:04:05Z07:00"
-const layout3 = "2006-01-02T15:04:05.999Z07:00"
-const layout6 = "2006-01-02T15:04:05.999999Z07:00"
-const layout9 = "2006-01-02T15:04:05.999999999Z07:00"
+const layout3 = "2006-01-02T15:04:05.000Z07:00"
+const layout6 = "2006-01-02T15:04:05.000000Z07:00"
+const layout0 = "2006-01-02T15:04:05.000000000Z07:00"
 
 func run(tz []byte, all bool) error {
 	bw := bufio.NewWriter(os.Stdout)
