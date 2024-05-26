@@ -30,14 +30,20 @@ jobs:
         bindir="$(go env GOPATH)/bin"
         name="$(basename "$PACKAGE_PATH")"
 
-        target="$name-$VERSION.$GOOS-$GOARCH"
+        target="$name"
         if [[ "$(go env GOOS)" = windows ]]
         then
           target="$target.exe"
         fi
 
-        go install -trimpath "$PACKAGE_PATH@$VERSION"
+        go install -tags netgo -trimpath "$PACKAGE_PATH@$VERSION"
         file="$(find "$bindir" -type f -executable -name "$target")"
+
+        target="$name-$VERSION.$GOOS-$GOARCH"
+        if [[ "$(go env GOOS)" = windows ]]
+        then
+          target="$target-$VERSION.$GOOS-$GOARCH.exe"
+        fi
         mv "$file" "$INPUT_PATH/$target"
         echo target="$target" >>"$GITHUB_OUTPUT"
       env:
