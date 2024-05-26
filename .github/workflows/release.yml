@@ -42,7 +42,7 @@ jobs:
         target="$name-$VERSION.$GOOS-$GOARCH"
         if [[ "$(go env GOOS)" = windows ]]
         then
-          target="$target-$VERSION.$GOOS-$GOARCH.exe"
+          target="$target.exe"
         fi
         mv "$file" "$INPUT_PATH/$target"
         echo target="$target" >>"$GITHUB_OUTPUT"
