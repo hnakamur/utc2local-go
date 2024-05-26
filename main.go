@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime/debug"
 	"time"
 )
@@ -17,6 +18,22 @@ const dateTimeScondLen = len("yyyy-mm-ddTHH:MM:SS")
 var digTbl = buildDigitTable()
 
 func main() {
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(),
+			"%s: This command line tool converts UTC timestamps in stdin and write converted lines to stdout.\n"+
+				"\n"+
+				"Supported timestamp format: yyyy-mm-ddTHH:MM:SS{subsecond}{tz}\n"+
+				"  where subsecond = (empty) | .SSS | .SSSSSS | .SSSSSSSSS\n"+
+				"        tz = Z | +00:00\n"+
+				"\n"+
+				"Homepage: https://github.com/hnakamur/utc2local-go\n"+
+				"License: MIT\n"+
+				"\n"+
+				"Usage of %s:\n",
+			filepath.Base(os.Args[0]), os.Args[0])
+		flag.PrintDefaults()
+	}
+
 	tz := flag.String("tz", "Z", `UTF timezone string to search ("Z" or "+00:00")`)
 	all := flag.Bool("all", false, "convert all datetimes in each line if set, only the first datetime in each line if unset")
 	showVersion := flag.Bool("version", false, "show version and exit")
