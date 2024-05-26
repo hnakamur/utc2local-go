@@ -19,13 +19,6 @@ jobs:
         arch:
         - amd64
         - arm64
-        include:
-        - format: tgz
-        - os: windows
-          format: zip
-        exclude:
-        - os: darwin
-          arch: amd64
     runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@v4
@@ -33,14 +26,27 @@ jobs:
       with:
         go-version: stable
     - name: Build the package
-      uses: lufia/workflows/.github/actions/go-install@v0.4.0
-      with:
-        package-path: github.com/hnakamur/utc2local-go
-        version: ${{ github.ref_name }}
+      run: |
+        bindir="$(go env GOPATH)/bin"
+        name="$(basename "$PACKAGE_PATH")"
+
+        target="$name-$VERSION.$GOOS-$GOARCH"
+        if [[ "$(go env GOOS)" = windows ]]
+        then
+          target="$target.exe"
+        fi
+
+        go install -trimpath "$PACKAGE_PATH@$VERSION"
+        file="$(find "$bindir" -type f -executable -name "$target")"
+        mv "$file" "$INPUT_PATH/$target"
+        echo target="$target" >>"$GITHUB_OUTPUT"
       env:
+        PACKAGE_PATH: github.com/hnakamur/utc2local-go
         GOOS: ${{ matrix.os }}
         GOARCH: ${{ matrix.arch }}
+        VERSION: ${{ github.ref_name }}
         CGO_ENABLED: 0
+      shell: bash
       id: build
     - name: Create the asset of the build artifacts
       uses: actions/upload-artifact@v4
