@@ -42,14 +42,11 @@ jobs:
         GOARCH: ${{ matrix.arch }}
         CGO_ENABLED: 0
       id: build
-    - name: Create the asset consists of the build artifacts
-      uses: lufia/workflows/.github/actions/upload-asset@v0.4.0
+    - name: Create the asset of the build artifacts
+      uses: actions/upload-asset@v0.4.0
       with:
         tag: ${{ github.ref_name }}
-        path: >
-          ${{ steps.build.outputs.target }}
-          LICENSE
-          README.md
+        path: ${{ steps.build.outputs.target }}
         name: utc2local-go-${{ github.ref_name }}.${{ matrix.os }}-${{ matrix.arch }}
         format: ${{ matrix.format }}
 
