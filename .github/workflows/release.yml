@@ -48,6 +48,7 @@ jobs:
         echo target="$target" >>"$GITHUB_OUTPUT"
       env:
         PACKAGE_PATH: github.com/hnakamur/utc2local-go
+        INPUT_PATH: ${{ github.workspace }}
         GOOS: ${{ matrix.os }}
         GOARCH: ${{ matrix.arch }}
         VERSION: ${{ github.ref_name }}
